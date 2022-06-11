@@ -1,0 +1,51 @@
+service: lambda-daily-emails
+frameworkVersion: '3'
+
+plugins:
+  - serverless-python-requirements
+custom:
+  pythonRequirements:
+    slim: true
+    dockerizePip: true
+    dockerSsh: true
+    fileName: requirements.txt
+    useDownloadCache: false
+    useStaticCache: false
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: python3.8
+
+  stage: ${opt:stage}
+  region: ${env:MY_REGION}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - ses:SendEmail
+            - ses:SendRawEmail
+            - dynamodb:Get*
+            - dynamodb:Query
+            - dynamodb:Scan
+          Resource: "*"
+
+functions:
+  emailer:
+    handler: handler.emailer
+    environment:
+      MY_ENV: ${env:MY_ENV}
+      MY_REGION: ${env:MY_REGION}
+
+resources:
+  Resources:
+    invokeLambda:
+      Type: AWS::Lambda::Permission
+      Properties:
+        Action: lambda:invokeFunction
+        FunctionName: 
+          "Fn::GetAtt": [EmailerLambdaFunction, Arn]
+        Principal: events.amazonaws.com
