@@ -1,10 +1,5 @@
 name: deploy to aws
 
-on: 
-  push:
-    branches:
-      - develop
-      - master
 on: workflow_dispatch
 
 jobs:
@@ -14,27 +9,25 @@ jobs:
     strategy:
       matrix:
         node-version: [15.x]
-      
     steps:
     - uses: actions/checkout@v3
     - name: use node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: $${{ matrix.node-version }}
-    - run: npm ci
-
+      run: npm ci
     - name: serverless install plugin and deploy
-    - uses: serverless/github-actions@v3
-    - if: ${{ GITHUB_HEAD_REF == 'develop' }}
-      shell: bash
-      run: !
-        echo "MY_ENV=test" >> $GITHUB_ENV
-        echo "MY_REGION=ap-soutn-1" >> $GITHUB_ENV
-        echo "BRANCH_NAME=develop" >> $GITHUB_ENV
-      if: ${{ GITHUB_HEAD_REF == 'master' || GITHUB_HEAD_REF == 'main' }}
-      shell: bash
+      uses: serverless/github-actions@v3
+      env:
+        MY_ENV: test
+        MY_REGION: ap-south-1
+        BRANCH_NAME: develop
+        AWS_SECRET_KEY_ID: ${{ secrets.AWS_SECRET_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: |
-        echo "MY_ENV=prod" >> $GITHUB_ENV
-        echo "MY_REGION=us-west-2" >> $GITHUB_ENV
-        echo "BRANCH_NAME=master" >> $GITHUB_ENV
-      
+        echo "$MY_ENV"
+        echo MY_REGION is "$MY_REGION"
+        echo BRANCH_NAME is "$BRANCH_NAME"
+        serverless deploy --stage=test
+    
+     
