@@ -16,18 +16,14 @@ jobs:
       with:
         node-version: $${{ matrix.node-version }}
       run: npm ci
+    - name: setup environment variables
+      run: |
+        echo "MY_ENV=test" >> $GITHUB_ENV
+        echo "MY_REGION=ap-south-1" >> $GITHUB_ENV
+        echo "BRANCH_NAME=develop" >> $GITHUB_ENV
     - name: serverless install plugin and deploy
       uses: serverless/github-actions@v3
-      env:
-        MY_ENV: test
-        MY_REGION: ap-south-1
-        BRANCH_NAME: develop
-        AWS_SECRET_KEY_ID: ${{ secrets.AWS_SECRET_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: |
-        echo "$MY_ENV"
-        echo MY_REGION is "$MY_REGION"
-        echo BRANCH_NAME is "$BRANCH_NAME"
-        serverless deploy --stage=test
+      with:
+        args: -c "serverless install plugins 'serverless-python-requirements' && serverless deploy --stage=test"
     
      
