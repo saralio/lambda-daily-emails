@@ -22,7 +22,7 @@ jobs:
         echo "MY_REGION=ap-south-1" >> $GITHUB_ENV
         echo "BRANCH_NAME=develop" >> $GITHUB_ENV
     - name: serverless install plugin and deploy
-      uses: serverless/github-actions@v3
+      uses: serverless/github-action@v3.1
       with:
         args: -c "serverless install plugins 'serverless-python-requirements' && serverless deploy --stage=test"
     
