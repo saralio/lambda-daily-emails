@@ -1,0 +1,1 @@
+[![deploy to aws](https://github.com/saralio/lambda-daily-emails/actions/workflows/deploy.yml/badge.svg)](https://github.com/saralio/lambda-daily-emails/actions/workflows/deploy.yml)
