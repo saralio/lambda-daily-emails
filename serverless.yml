@@ -9,6 +9,8 @@ custom:
     dockerizePip: true
     useDownloadCache: false
     useStaticCache: false
+    dockerEnv:
+      - BRANCH_NAME: ${env:BRANCH_NAME}
 
 package:
   individually: true
