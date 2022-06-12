@@ -9,7 +9,14 @@ custom:
     dockerizePip: true
     useDownloadCache: false
     useStaticCache: false
-    dockerRunCmdExtraArgs: ['--env BRANCH_NAME=${env:BRANCH_NAME}']
+    fileName: ${custom.branch.${env:BRANCH_NAME}}
+  
+  branch:
+    - develop: requirements-develop.txt
+    - master: requirements-master.txt
+    - main: requirements-main.txt
+
+
 package:
   individually: true
   patterns:
