@@ -24,7 +24,7 @@ provider:
   name: aws
   runtime: python3.8
 
-  stage: ${opt:stage}
+  stage: ${env:MY_ENV}
   region: ${env:MY_REGION}
   iam:
     role:
