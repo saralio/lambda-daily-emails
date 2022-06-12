@@ -21,13 +21,13 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: setup environment variables if branch is develop
-      if: ${{ GITHUB_REF_NAME == 'develop' }}
+      if: ${{ env.GITHUB_REF_NAME == 'develop' }}
       run: |
         echo "MY_ENV=test" >> $GITHUB_ENV
         echo "MY_REGION=ap-south-1" >> $GITHUB_ENV
         echo "BRANCH_NAME=develop" >> $GITHUB_ENV
     - name: setup environment variables if branch is master or main
-      if: ${{ GITHUB_REF_NAME == 'master' || GITHUB_REF_NAME == 'main' }}
+      if: ${{ env.GITHUB_REF_NAME == 'master' || env.GITHUB_REF_NAME == 'main' }}
       run: |
         echo "MY_ENV=prod" >> $GITHUB_ENV
         echo "MY_REGION=us-west-2" >> $GITHUB_ENV
