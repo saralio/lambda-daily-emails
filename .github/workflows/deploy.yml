@@ -15,19 +15,24 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci
     - name: setup environment variables
       run: |
         echo "MY_ENV=test" >> $GITHUB_ENV
         echo "MY_REGION=ap-south-1" >> $GITHUB_ENV
         echo "BRANCH_NAME=develop" >> $GITHUB_ENV
-    - name: serverless install plugin and deploy
-      uses: serverless/github-action@v3.1
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@master
       with:
-        args: -c "serverless plugin install --name serverless-python-requirements && serverless deploy --stage=${{ env.MY_ENV }} --verbose"
-        entrypoint: /bin/sh
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    
+        aws-region: env.MY_REGION
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    - run: npm ci
+    - name: install serverless framework
+      run: npm install -g serverless
+    - name: serverless authentication
+      run: sls config credentials --provider aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    - name: install plugins
+      run: sls plugin install --name serverless-python-requirements
+    - name: build and deploy
+      run: sls deploy --verbose
      
