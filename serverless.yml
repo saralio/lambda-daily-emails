@@ -8,13 +8,18 @@ custom:
     slim: true
     dockerizePip: true
     dockerSsh: true
-    fileName: requirements.txt
     useDownloadCache: false
     useStaticCache: false
 
 package:
   individually: true
-
+  patterns:
+    - '.github/**'
+    - '__pycache__/**'
+    - 'rough.py'
+    - 'sample-questions.json'
+    - 'question.html'
+    - 'README.md'
 provider:
   name: aws
   runtime: python3.8
