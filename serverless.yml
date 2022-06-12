@@ -7,7 +7,6 @@ custom:
   pythonRequirements:
     slim: true
     dockerizePip: true
-    dockerSsh: true
     useDownloadCache: false
     useStaticCache: false
 
