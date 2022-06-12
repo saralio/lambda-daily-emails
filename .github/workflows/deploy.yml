@@ -31,7 +31,7 @@ jobs:
       run: |
         echo "MY_ENV=prod" >> $GITHUB_ENV
         echo "MY_REGION=us-west-2" >> $GITHUB_ENV
-        echo "BRANCH_NAME=${{ GITHUB_HEAD_REF }}" >> $GITHUB_ENV
+        echo "BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
     - name: configure aws credentials
       uses: aws-actions/configure-aws-credentials@master
       with:
