@@ -51,13 +51,15 @@ commands:
     steps: 
       - python/install-packages:
           pkg-manager: pip
-          pip-dependency-file: ./requirements/requirements-$BRANCH_NAME.txt
+          pip-dependency-file: ./requirements/requirements-<< parameters.branch_name >>.txt
       - run: |
           response=$(sls invoke local -f emailer -d '<< parameters.test_data >>')
           echo $response
     parameters:
       test_data:
         default: '{"emailId": "mohitlakshya@gmail.com"}'
+        type: string
+      branch_name: 
         type: string
 
 executors:
@@ -101,7 +103,7 @@ jobs:
     environment:
       MY_ENV: test
       MY_REGION: ap-south-1
-      BRANCH_NAME: develop
+      BRANCH_NAME: &branch_name develop
     steps:
       - checkout
       - serverless-framework/setup
@@ -109,7 +111,8 @@ jobs:
       - install_plugin
       - authenticate_serverless
       - build_pkg
-      - test_pkg
+      - test_pkg:
+          branch_name: *branch_name
 
 workflows:
   serverless:
