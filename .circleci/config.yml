@@ -41,16 +41,28 @@ commands:
       - run:
           name: build lambda package
           command: 'sls package --package lambda_pkg --stage=$MY_ENV'
-
   deploy_pkg:
     description: deploy lambda package
     steps:
       - run: 'sls deploy ./lambda_pkg --stage=$MY_ENV'
+  test_pkg:
+    description: test lambda package locally
+    steps: 
+      - run: |
+          response=$(sls invoke local -f emailer -d '<< parameters.test_data >>')
+          echo $response
+          if [[ $"response" -ne 200 ]]; then exit 1; else exit 0; fi
+    parameters:
+      test_data:
+        default: '{"emailId": "mohitlakshya@gmail.com"}'
+        type: string
+    
 
 executors:
   base-image:
     docker:
       - image: cimg/base:stable
+    resource_class: small
 
 jobs:
   develop:
@@ -66,6 +78,7 @@ jobs:
       - install_plugin
       - authenticate_serverless
       - build_pkg
+      - test_pkg
       - deploy_pkg
   master:
     executor: base-image
@@ -87,10 +100,6 @@ jobs:
       MY_ENV: test
       MY_REGION: ap-south-1
       BRANCH_NAME: develop
-    parameters:
-      test_data:
-        default: '{"emailId": "mohitlakshya@gmail.com"}'
-        type: string
     steps:
       - checkout
       - serverless-framework/setup
@@ -98,9 +107,7 @@ jobs:
       - install_plugin
       - authenticate_serverless
       - build_pkg
-      - run:
-          name: test lcoally by invoking lambda function
-          command: "sls invoke local -f emailer -d  '<< parameters.test_data >>'"
+      - test_pkg
 
 workflows:
   serverless:
