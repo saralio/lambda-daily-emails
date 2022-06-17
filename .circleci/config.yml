@@ -83,7 +83,7 @@ jobs:
       - build_pkg
       - run: 
           name: test lcoally by invoking lambda function
-          command: sls invoke local -f emailer -d "{\"emailId\": \"mohiitlakshya@gmail.com\"}\"
+          command: sls invoke local -f emailer -d '{"emailId": "mohiitlakshya@gmail.com"}'
 
 workflows:
   serverless:
