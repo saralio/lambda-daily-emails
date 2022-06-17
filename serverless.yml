@@ -12,9 +12,9 @@ custom:
     fileName: ${custom.branch.${env:BRANCH_NAME}}
   
   branch:
-    - develop: requirements-develop.txt
-    - master: requirements-master.txt
-    - main: requirements-main.txt
+    - develop: ./requirements/requirements-develop.txt
+    - master: ./requirements/requirements-master.txt
+    - main: ./requirements/requirements-main.txt
 
 
 package:
