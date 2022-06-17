@@ -42,7 +42,8 @@ commands:
 
 executors:
   base-image:
-    docker: cimg/base:stable
+    docker: 
+    - image: cimg/base:stable
     working_directory: /tmp
 
 jobs:
