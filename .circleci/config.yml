@@ -23,11 +23,14 @@ commands:
           name: install serverless framework
           command: npm install -g serverless
       - run:
-          name: authenticate serverless
-          command: sls config credentials --provider aws --key $AWS_ACCESS_KEY_ID --secret $AWS_SECRET_ACCESS_KEY
-      - run:
           name: install serverless plugins
           command: sls plugin install --name serverless-python-requirements
+  authentica_serverless:
+    description: authenticate serverles
+    steps:
+      - run:
+          name: authenticate serverless
+          command: sls config credentials --provider aws --key $AWS_ACCESS_KEY_ID --secret $AWS_SECRET_ACCESS_KEY --stage=$MY_ENV
   build_pkg:
     description: build serverless package
     steps:
@@ -59,6 +62,7 @@ jobs:
       BRANCH_NAME: develop
     steps:
       - check_env_var
+      - authenticate_serverless
       - build_pkg
       - deploy_pkg
   master:
@@ -69,6 +73,7 @@ jobs:
       BRANCH_NAME: master
     steps:
       - check_env_var
+      - authenticate_serverless
       - build_pkg
       - deploy_pkg
   feature:
@@ -79,6 +84,7 @@ jobs:
       BRANCH_NAME: develop
     steps:
       - check_env_var
+      - authenticate_serverless
       - build_pkg
       - run:
           name: test lcoally by invoking lambda function
