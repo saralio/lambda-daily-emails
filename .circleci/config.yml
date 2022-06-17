@@ -4,7 +4,7 @@ orbs:
   node: circleci/node@5.0.2
 
 commands:
-  check_env_var: 
+  check_env_var:
     description: checking environment variables
     steps:
       - run: |
@@ -14,101 +14,101 @@ commands:
           echo BRANCH_NAME is $BRANCH_NAME
   setup_serverless:
     description: setup serverless
-    steps: 
+    steps:
       - node/install:
-          node-version: '16.13'
+          node-version: "16.13"
       - run: node --version
       - run: npm ci
-      - run: 
+      - run:
           name: install serverless framework
           command: npm install -g serverless
-      - run: 
+      - run:
           name: authenticate serverless
           command: sls config credentials --provider aws --key $AWS_ACCESS_KEY_ID --secret $AWS_SECRET_ACCESS_KEY
-      - run: 
-          name: install serverless plugins 
+      - run:
+          name: install serverless plugins
           command: sls plugin install --name serverless-python-requirements
-  build_pkg: 
+  build_pkg:
     description: build serverless package
-    steps: 
-      - run: 
+    steps:
+      - run:
           name: build lambda package
           command: sls package --package lambda_pkg --stage=$MY_ENV
 
   deploy_pkg:
     description: deploy lambda package
-    steps: 
+    steps:
       - run: sls deploy ./lambda_pkg --stage=$MY_ENV
 
 executors:
   base-image:
-    docker: 
-    - image: cimg/base:stable
+    docker:
+      - image: cimg/base:stable
     working_directory: /tmp
 
 jobs:
-  setup: 
+  setup_env:
     executor: base-image
-    steps: 
-      - checkout 
-      - setup_serverless    
+    steps:
+      - checkout
+      - setup_serverless
   develop:
     executor: base-image
     environment:
       MY_ENV: test
       MY_REGION: ap-south-1
       BRANCH_NAME: develop
-    steps: 
+    steps:
       - check_env_var
       - build_pkg
       - deploy_pkg
-  master: 
+  master:
     executor: base-image
     environment:
       MY_ENV: prod
       MY_REGION: us-west-2
       BRANCH_NAME: master
-    steps: 
+    steps:
       - check_env_var
       - build_pkg
-      - deploy_pkg 
-  feature: 
+      - deploy_pkg
+  feature:
     executor: base-image
-    environment: 
+    environment:
       MY_ENV: test
       MY_REGION: ap-south-1
       BRANCH_NAME: develop
-    steps: 
+    steps:
       - check_env_var
       - build_pkg
-      - run: 
+      - run:
           name: test lcoally by invoking lambda function
-          command: 'sls invoke local -f emailer'
+          command: "sls invoke local -f emailer"
 
 workflows:
   serverless:
     jobs:
+      - setup_env
       - develop:
           context: aws
           filters:
             branches:
               only: develop
           requires:
-            - setup 
-      - master: 
+            - setup_env
+      - master:
           context: aws
           filters:
             branches:
               only: master
-          requires: 
-            - setup
-      - feature: 
+          requires:
+            - setup_env
+      - feature:
           context: aws
           filters:
             branches:
               ignore:
                 - develop
                 - master
-          requires: 
-            - setup
-
+          requires:
+            - setup_env
