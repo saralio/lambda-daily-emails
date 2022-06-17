@@ -20,9 +20,7 @@ jobs:
       BRANCH_NAME: develop
     steps:
       - checkout
-      - run:
-          name: "checking environment variables"
-          command: check_env_var
+      - check_env_var
 
 workflows:
   serverless:
