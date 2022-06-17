@@ -44,7 +44,6 @@ executors:
   base-image:
     docker:
       - image: cimg/base:stable
-    working_directory: /tmp
 
 jobs:
   setup_env:
