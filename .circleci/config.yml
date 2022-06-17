@@ -1,26 +1,142 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+orbs:
+  node: circleci/node@5.0.2
+  serverless-framework: circleci/serverless-framework@2.0
+  python: circleci/python@2.0.3
+
+commands:
+  check_env_var:
+    description: checking environment variables
+    steps:
+      - run: |
+          echo checking environment variables
+          echo MY_ENV is $MY_ENV
+          echo MY_REGION is $MY_REGION
+          echo BRANCH_NAME is $BRANCH_NAME
+  setup_serverless:
+    description: setup serverless
+    steps:
+      - node/install:
+          node-version: "16.13"
+      - run: node --version
+      - run: npm ci
+      - run:
+          name: install serverless framework
+          command: npm install -g serverless
+  install_plugin:
+    description: install serverless plugin
+    steps:
+      - run:
+          name: install serverless plugins
+          command: 'sls plugin install --name serverless-python-requirements --stage=$MY_ENV'
+  authenticate_serverless:
+    description: authenticate serverles
+    steps:
+      - run:
+          name: authenticate serverless
+          command: 'sls config credentials --provider aws --key $AWS_ACCESS_KEY_ID --secret $AWS_SECRET_ACCESS_KEY'
+  build_pkg:
+    description: build serverless package
+    steps:
+      - run:
+          name: build lambda package
+          command: 'sls package --package lambda_pkg --stage=$MY_ENV --verbose'
+  deploy_pkg:
+    description: deploy lambda package
+    steps:
+      - run: 'sls deploy ./lambda_pkg --stage=$MY_ENV --verbose'
+  test_pkg:
+    description: test lambda package locally
+    steps: 
+      - run: pip3 install -r ./requirements/requirements-<< parameters.branch_name >>.txt
+      - run: |
+          response=$(sls invoke local -f emailer -d '<< parameters.test_data >>')
+          if echo $response | grep -Eq "^Error"; then 
+            echo $response
+            exit 1 
+          else 
+            exit 0 
+          fi
+    parameters:
+      test_data:
+        default: '{"emailId": "mohitlakshya@gmail.com"}'
+        type: string
+      branch_name: 
+        type: string
+
+executors:
+  base-image:
+    machine:
+      image: ubuntu-2004:current
+    resource_class: medium
+
 jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
-    docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+  develop:
+    executor: base-image
+    environment:
+      MY_ENV: test
+      MY_REGION: ap-south-1
+      BRANCH_NAME: &branch_name develop
     steps:
       - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+      - serverless-framework/setup
+      - check_env_var
+      - install_plugin
+      - authenticate_serverless
+      - test_pkg:
+          branch_name: *branch_name
+      - build_pkg
+      - deploy_pkg
+  master:
+    executor: base-image
+    environment:
+      MY_ENV: prod
+      MY_REGION: us-west-2
+      BRANCH_NAME: &branch_name master
+    steps:
+      - checkout
+      - serverless-framework/setup
+      - check_env_var
+      - install_plugin
+      - authenticate_serverless
+      - test_pkg:
+          branch_name: *branch_name
+      - build_pkg
+      - deploy_pkg
+  feature:
+    executor: base-image
+    environment:
+      MY_ENV: test
+      MY_REGION: ap-south-1
+      BRANCH_NAME: &branch_name develop
+    steps:
+      - checkout
+      - serverless-framework/setup
+      - check_env_var
+      - install_plugin
+      - authenticate_serverless
+      - build_pkg
+      - test_pkg:
+          branch_name: *branch_name
 
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  say-hello-workflow:
+  serverless:
     jobs:
-      - say-hello
+      - develop:
+          context: aws
+          filters:
+            branches:
+              only: develop
+      - master:
+          context: aws
+          filters:
+            branches:
+              only: master
+      - feature:
+          context: aws
+          filters:
+            branches:
+              ignore:
+                - develop
+                - master
