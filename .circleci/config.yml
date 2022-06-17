@@ -45,7 +45,7 @@ commands:
   deploy_pkg:
     description: deploy lambda package
     steps:
-      - run: 'sls deploy ./lambda_pkg --stage=$MY_ENV --verbose'
+      - run: 'sls deploy --package ./lambda_pkg --stage=$MY_ENV --verbose'
   test_pkg:
     description: test lambda package locally
     steps: 
@@ -56,6 +56,7 @@ commands:
             echo $response
             exit 1 
           else 
+            echo $response
             exit 0 
           fi
     parameters:
