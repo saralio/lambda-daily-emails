@@ -40,11 +40,11 @@ commands:
     steps:
       - run:
           name: build lambda package
-          command: 'sls package --package lambda_pkg --stage=$MY_ENV'
+          command: 'sls package --package lambda_pkg --stage=$MY_ENV --verbose'
   deploy_pkg:
     description: deploy lambda package
     steps:
-      - run: 'sls deploy ./lambda_pkg --stage=$MY_ENV'
+      - run: 'sls deploy ./lambda_pkg --stage=$MY_ENV --verbose'
   test_pkg:
     description: test lambda package locally
     steps: 
