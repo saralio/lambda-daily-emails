@@ -30,18 +30,18 @@ commands:
     steps:
       - run:
           name: authenticate serverless
-          command: sls config credentials --provider aws --key $AWS_ACCESS_KEY_ID --secret $AWS_SECRET_ACCESS_KEY --stage $MY_ENV
+          command: 'sls config credentials --provider aws --key $AWS_ACCESS_KEY_ID --secret $AWS_SECRET_ACCESS_KEY --stage $MY_ENV'
   build_pkg:
     description: build serverless package
     steps:
       - run:
           name: build lambda package
-          command: sls package --package lambda_pkg --stage=$MY_ENV
+          command: 'sls package --package lambda_pkg --stage=$MY_ENV'
 
   deploy_pkg:
     description: deploy lambda package
     steps:
-      - run: sls deploy ./lambda_pkg --stage=$MY_ENV
+      - run: 'sls deploy ./lambda_pkg --stage=$MY_ENV'
 
 executors:
   base-image:
