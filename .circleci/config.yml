@@ -25,7 +25,7 @@ commands:
       - run:
           name: install serverless plugins
           command: sls plugin install --name serverless-python-requirements
-  authentica_serverless:
+  authenticate_serverless:
     description: authenticate serverles
     steps:
       - run:
