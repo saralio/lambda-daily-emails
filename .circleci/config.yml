@@ -1,26 +1,30 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+commands:
+  check_env_var: 
+    description: checking environment variables
+    steps:
+      - run: |
+          echo checking environment variables
+          echo MY_ENV is $MY_ENV
+          echo MY_REGION is $MY_REGION
+          echo BRANCH_NAME is $BRANCH_NAME
+
 jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+  develop:
     docker:
       - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+    environment:
+      MY_ENV: test
+      MY_REGION: ap-south-1
+      BRANCH_NAME: develop
     steps:
       - checkout
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+          name: "checking environment variables"
+          command: check_env_var
 
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  say-hello-workflow:
+  serverless:
     jobs:
-      - say-hello
+      - develop
