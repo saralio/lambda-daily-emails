@@ -99,7 +99,7 @@ jobs:
       - build_pkg
       - run:
           name: test lcoally by invoking lambda function
-          command: "sls invoke local -f emailer << parameters.test_data >>"
+          command: "sls invoke local -f emailer -d  '<< parameters.test_data >>'"
 
 workflows:
   serverless:
