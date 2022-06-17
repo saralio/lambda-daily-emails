@@ -104,7 +104,7 @@ workflows:
           context: aws
           filters:
             branches:
-              ignores:
+              ignore:
                 - develop
                 - master
           requires: setup
