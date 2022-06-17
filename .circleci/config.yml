@@ -82,7 +82,6 @@ jobs:
       - install_plugin
       - authenticate_serverless
       - build_pkg
-      - test_pkg
       - deploy_pkg
   master:
     executor: base-image
