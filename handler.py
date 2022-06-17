@@ -71,6 +71,7 @@ def emailer(event, context):
     Your donation helps us keep the services afloat. Be sure to follow us on [twitter](https://www.twitter.com/data_question) and [Youtube](#href) for regular updates.*\
     \n\n*To unsubscribe click [here](#href)*"
 
+    # html = html_text
     html = markdown.markdown(html_text, extensions=['markdown.extensions.fenced_code', 'markdown.extensions.codehilite'], extension_configs={
                              'markdown.extensions.codehilite': {'pygments_style': 'material', 'noclasses': True, 'cssstyles': 'padding: 10px 10px 10px 20px'}})
 
@@ -102,4 +103,6 @@ def emailer(event, context):
         print(error)
         raise RuntimeError(error)
 
-    print("Email Sent successfully")
+    response = {"statuscode": 200}
+
+    return response
