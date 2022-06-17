@@ -59,5 +59,4 @@ workflows:
   serverless:
     jobs:
       - develop
-          context:
-            - aws
+          context: aws
