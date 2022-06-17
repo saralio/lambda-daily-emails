@@ -41,7 +41,7 @@ commands:
       - run: sls deploy ./lambda_pkg --stage=$MY_ENV
 
 executors:
-  base-img:
+  base-image:
     docker: cimg/base:stable
     working_directory: /tmp
 
