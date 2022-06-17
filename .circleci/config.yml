@@ -52,7 +52,7 @@ commands:
       - run: pip3 install -r ./requirements/requirements-<< parameters.branch_name >>.txt
       - run: |
           response=$(sls invoke local -f emailer -d '<< parameters.test_data >>')
-          if [[ $response == *Error* ]]; then 
+          if echo $response | grep -Eq "^Error"; then 
             echo $response
             exit 1 
           else 
@@ -77,13 +77,15 @@ jobs:
     environment:
       MY_ENV: test
       MY_REGION: ap-south-1
-      BRANCH_NAME: develop
+      BRANCH_NAME: &branch_name develop
     steps:
       - checkout
       - serverless-framework/setup
       - check_env_var
       - install_plugin
       - authenticate_serverless
+      - test_pkg:
+          branch_name: *branch_name
       - build_pkg
       - deploy_pkg
   master:
@@ -91,13 +93,15 @@ jobs:
     environment:
       MY_ENV: prod
       MY_REGION: us-west-2
-      BRANCH_NAME: master
+      BRANCH_NAME: &branch_name master
     steps:
       - checkout
       - serverless-framework/setup
       - check_env_var
       - install_plugin
       - authenticate_serverless
+      - test_pkg:
+          branch_name: *branch_name
       - build_pkg
       - deploy_pkg
   feature:
