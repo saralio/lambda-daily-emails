@@ -49,10 +49,15 @@ commands:
   test_pkg:
     description: test lambda package locally
     steps: 
+      - run: pip3 install -r ./requirements/requirements-<< parameters.branch_name >>.txt
       - run: |
-          pip3 install -r ./requirements/requirements-<< parameters.branch_name >>.txt
           response=$(sls invoke local -f emailer -d '<< parameters.test_data >>')
-          echo $response
+          if [[ $response == *Error* ]]; then 
+            echo $response
+            exit 1 
+          else 
+            exit 0 
+          fi
     parameters:
       test_data:
         default: '{"emailId": "mohitlakshya@gmail.com"}'
