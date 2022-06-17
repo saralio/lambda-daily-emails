@@ -52,11 +52,6 @@ executors:
       - image: cimg/base:stable
 
 jobs:
-  setup_env:
-    executor: base-image
-    steps:
-      - checkout
-      - setup_serverless
   develop:
     executor: base-image
     environment:
@@ -64,6 +59,7 @@ jobs:
       MY_REGION: ap-south-1
       BRANCH_NAME: develop
     steps:
+      - setup_serverless
       - check_env_var
       - install_plugin
       - authenticate_serverless
@@ -76,6 +72,7 @@ jobs:
       MY_REGION: us-west-2
       BRANCH_NAME: master
     steps:
+      - setup_serverless
       - check_env_var
       - install_plugin
       - authenticate_serverless
@@ -88,6 +85,7 @@ jobs:
       MY_REGION: ap-south-1
       BRANCH_NAME: develop
     steps:
+      - setup_serverless
       - check_env_var
       - install_plugin
       - authenticate_serverless
@@ -99,22 +97,16 @@ jobs:
 workflows:
   serverless:
     jobs:
-      - setup_env:
-          context: aws
       - develop:
           context: aws
           filters:
             branches:
               only: develop
-          requires:
-            - setup_env
       - master:
           context: aws
           filters:
             branches:
               only: master
-          requires:
-            - setup_env
       - feature:
           context: aws
           filters:
@@ -122,5 +114,3 @@ workflows:
               ignore:
                 - develop
                 - master
-          requires:
-            - setup_env
