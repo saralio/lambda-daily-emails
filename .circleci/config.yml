@@ -49,10 +49,8 @@ commands:
   test_pkg:
     description: test lambda package locally
     steps: 
-      - python/install-packages:
-          pkg-manager: pip
-          pip-dependency-file: ./requirements/requirements-<< parameters.branch_name >>.txt
       - run: |
+          pip3 install -r ./requirements/requirements-<< parameters.branch_name >>.txt
           response=$(sls invoke local -f emailer -d '<< parameters.test_data >>')
           echo $response
     parameters:
