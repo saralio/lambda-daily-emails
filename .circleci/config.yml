@@ -56,6 +56,10 @@ commands:
       test_data:
         default: '{"emailId": "mohitlakshya@gmail.com"}'
         type: string
+  start_docker:
+    description: start docker service
+    steps: 
+      - run: systemctl start docker
     
 
 executors:
@@ -106,7 +110,7 @@ jobs:
       - check_env_var
       - install_plugin
       - authenticate_serverless
-      - setup_remote_docker
+      - start_docker
       - build_pkg
       - test_pkg
 
