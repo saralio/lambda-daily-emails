@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   node: circleci/node@5.0.2
   serverless-framework: circleci/serverless-framework@2.0
+  python: circleci/python@2.0.3
 
 commands:
   check_env_var:
@@ -48,16 +49,16 @@ commands:
   test_pkg:
     description: test lambda package locally
     steps: 
-      - run: sls invoke local -f emailer -d '<< parameters.test_data >>'
+      - python/install-packages:
+          pkg-manager: pip
+          pip-dependency-file: ./requirements/requirements-$BRANCH_NAME.txt
+      - run: |
+          response=$(sls invoke local -f emailer -d '<< parameters.test_data >>')
+          echo $response
     parameters:
       test_data:
         default: '{"emailId": "mohitlakshya@gmail.com"}'
         type: string
-  start_docker:
-    description: start docker service
-    steps: 
-      - run: systemctl start docker
-    
 
 executors:
   base-image:
