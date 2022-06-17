@@ -106,6 +106,7 @@ jobs:
       - check_env_var
       - install_plugin
       - authenticate_serverless
+      - setup_remote_docker
       - build_pkg
       - test_pkg
 
