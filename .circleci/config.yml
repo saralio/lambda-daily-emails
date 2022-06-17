@@ -57,32 +57,6 @@ jobs:
   check_env: 
     step: 
       - check_env_var
-  develop: 
-    filters:
-      branches:
-        only: develop
-    environment:
-      MY_ENV: test
-      MY_REGION: ap-south-1
-      BRANCH_NAME: develop
-    requires:
-      - setup 
-      - check_env_var
-      - build_pkg
-  feature:
-    filters:
-      branches:
-        ignore:
-          - develop
-          - main 
-    environment: 
-      MY_ENV: test
-      MY_REGION: ap-south-1
-      BRANCH_NAME: develop
-    requires:
-      - setup
-      - check_env_var
-      - build_pkg
 workflows:
   serverless:
     jobs:
@@ -92,3 +66,16 @@ workflows:
       - feature:
           context:
             - aws
+          filters:
+            branches:
+              ignore:
+                - develop
+                - main 
+          requires:
+            - setup
+            - check_env
+            - build
+          environment:
+            MY_ENV: test
+            MY_REGION: ap-south-1
+            BRANCH_NAME: develop
