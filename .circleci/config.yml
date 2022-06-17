@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  node: circleci/node@5.0.2
+
 commands:
   check_env_var: 
     description: checking environment variables
@@ -9,6 +12,34 @@ commands:
           echo MY_ENV is $MY_ENV
           echo MY_REGION is $MY_REGION
           echo BRANCH_NAME is $BRANCH_NAME
+  setup_serverless:
+    description: setup serverless
+    steps: 
+      - node/install:
+          node-version: '16.13'
+      - run: node --version
+      - run: npm ci
+      - run: 
+          name: install serverless framework
+          command: npm install -g serverless
+      - run: 
+          name: authenticate serverless
+          command: sls config credentials --provider aws --key $AWS_ACCESS_KEY_ID --secret $AWS_SECRET_ACCESS_KEY
+      - run: 
+          name: install serverless plugins 
+          command: sls plugin install --name serverless-python-requirements
+  build_pkg: 
+    description: build serverless package
+    steps: 
+      - run: 
+          name: build lambda package
+          command: sls package --package lambda_pkg
+  deployg_pkg:
+    description: deploy lambda package
+    steps: 
+      - run: sls deploy ./lambda_pkg --stage=$MY_ENV
+
+
 
 jobs:
   develop:
@@ -21,8 +52,12 @@ jobs:
     steps:
       - checkout
       - check_env_var
+      - setup_serverless
+      - build_pkg
 
 workflows:
   serverless:
     jobs:
       - develop
+          context:
+            - aws
