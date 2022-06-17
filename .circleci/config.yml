@@ -48,10 +48,7 @@ commands:
   test_pkg:
     description: test lambda package locally
     steps: 
-      - run: |
-          response=$(sls invoke local -f emailer -d '<< parameters.test_data >>')
-          echo $response
-          if [[ $"response" -ne 200 ]]; then exit 1; else exit 0; fi
+      - run: sls invoke local -f emailer -d '<< parameters.test_data >>'
     parameters:
       test_data:
         default: '{"emailId": "mohitlakshya@gmail.com"}'
