@@ -86,6 +86,10 @@ jobs:
       MY_ENV: test
       MY_REGION: ap-south-1
       BRANCH_NAME: develop
+    parameters:
+      test_data:
+        default: '{"emailId": "mohitlakshya@gmail.com"}'
+        type: string
     steps:
       - checkout
       - setup_serverless
@@ -95,7 +99,7 @@ jobs:
       - build_pkg
       - run:
           name: test lcoally by invoking lambda function
-          command: "sls invoke local -f emailer"
+          command: "sls invoke local -f emailer << parameters.test_data >>"
 
 workflows:
   serverless:
