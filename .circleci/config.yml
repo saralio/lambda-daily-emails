@@ -59,6 +59,7 @@ jobs:
       MY_REGION: ap-south-1
       BRANCH_NAME: develop
     steps:
+      - checkout
       - setup_serverless
       - check_env_var
       - install_plugin
@@ -72,6 +73,7 @@ jobs:
       MY_REGION: us-west-2
       BRANCH_NAME: master
     steps:
+      - checkout
       - setup_serverless
       - check_env_var
       - install_plugin
@@ -85,6 +87,7 @@ jobs:
       MY_REGION: ap-south-1
       BRANCH_NAME: develop
     steps:
+      - checkout
       - setup_serverless
       - check_env_var
       - install_plugin
