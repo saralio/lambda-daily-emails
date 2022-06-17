@@ -33,7 +33,7 @@ commands:
     steps:
       - run:
           name: authenticate serverless
-          command: 'sls config credentials --provider aws --key $AWS_ACCESS_KEY_ID --secret $AWS_SECRET_ACCESS_KEY --stage=$MY_ENV'
+          command: 'sls config credentials --provider aws --key $AWS_ACCESS_KEY_ID --secret $AWS_SECRET_ACCESS_KEY'
   build_pkg:
     description: build serverless package
     steps:
