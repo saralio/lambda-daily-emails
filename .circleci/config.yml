@@ -33,8 +33,8 @@ commands:
     steps: 
       - run: 
           name: build lambda package
-          command: sls package --package lambda_pkg
-  deployg_pkg:
+          command: sls package --package lambda_pkg --stage=$MY_ENV
+  deploy_pkg:
     description: deploy lambda package
     steps: 
       - run: sls deploy ./lambda_pkg --stage=$MY_ENV
@@ -42,22 +42,53 @@ commands:
 
 
 jobs:
-  develop:
-    docker:
+  setup: 
+    docker: 
       - image: cimg/base:stable
+    steps: 
+      - checkout 
+      - setup_serverless
+  build: 
+    steps: 
+      - build_pkg 
+  deploy: 
+    steps: 
+      - deploy_pkg
+  check_env: 
+    step: 
+      - check_env_var
+  develop: 
+    filters:
+      branches:
+        only: develop
     environment:
       MY_ENV: test
       MY_REGION: ap-south-1
       BRANCH_NAME: develop
-    steps:
-      - checkout
+    requires:
+      - setup 
       - check_env_var
-      - setup_serverless
       - build_pkg
-
+  feature:
+    filters:
+      branches:
+        ignore:
+          - develop
+          - main 
+    environment: 
+      MY_ENV: test
+      MY_REGION: ap-south-1
+      BRANCH_NAME: develop
+    requires:
+      - setup
+      - check_env_var
+      - build_pkg
 workflows:
   serverless:
     jobs:
       - develop:
+          context:
+            - aws
+      - feature:
           context:
             - aws
