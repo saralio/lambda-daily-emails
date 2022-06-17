@@ -34,48 +34,78 @@ commands:
       - run: 
           name: build lambda package
           command: sls package --package lambda_pkg --stage=$MY_ENV
+      - persist_to_workspace: 
+
   deploy_pkg:
     description: deploy lambda package
     steps: 
       - run: sls deploy ./lambda_pkg --stage=$MY_ENV
 
-
+executors:
+  base-img:
+    docker: cimg/base:stable
+    working_directory: /tmp
 
 jobs:
   setup: 
-    docker: 
-      - image: cimg/base:stable
+    executor: base-image
     steps: 
       - checkout 
-      - setup_serverless
-  build: 
+      - setup_serverless    
+  develop:
+    executor: base-image
+    environment:
+      MY_ENV: test
+      MY_REGION: ap-south-1
+      BRANCH_NAME: develop
     steps: 
-      - build_pkg 
-  deploy: 
-    steps: 
-      - deploy_pkg
-  check_env: 
-    step: 
       - check_env_var
+      - build_pkg
+      - deploy_pkg
+  master: 
+    executor: base-image
+    environment:
+      MY_ENV: prod
+      MY_REGION: us-west-2
+      BRANCH_NAME: master
+    steps: 
+      - check_env_var
+      - build_pkg
+      - deploy_pkg 
+  feature: 
+    executor: base-image
+    environment: 
+      MY_ENV: test
+      MY_REGION: ap-south-1
+      BRANCH_NAME: develop
+    steps: 
+      - check_env_var
+      - build_pkg
+      - run: 
+          name: test lcoally by invoking lambda function
+          command: sls invoke local -f emailer -d \'{\"emailId\": \"mohiitlakshya@gmail.com\"}\'
+
 workflows:
   serverless:
     jobs:
       - develop:
-          context:
-            - aws
-      - feature:
-          context:
-            - aws
+          context: aws
           filters:
             branches:
-              ignore:
+              only: develop
+          requires: setup 
+      - master: 
+          context: aws
+          filters:
+            branches:
+              only: master
+          requires: setup
+      - feature: 
+          context: aws
+          filters:
+            branches:
+              ignores:
                 - develop
-                - main 
-          requires:
-            - setup
-            - check_env
-            - build
-          environment:
-            MY_ENV: test
-            MY_REGION: ap-south-1
-            BRANCH_NAME: develop
+                - master
+          requires: setup
+
