@@ -63,7 +63,6 @@ def emailer(event, context):
 
     #TODO: [SAR-36] add view answer link
     #TODO: [SAR-37] add share link allowing people to share about question or site
-    #TODO: [SAR-38] add link for donation
     #TODO: [SAR-39] add youtube link
     #TODO: [SAR-40] add unsubscribe link
     html_text = f"## Here's your daily dose of [#RStats](https://www.twitter.com/data_question)\n\n### Question\n{que_text}\n\n#### Options\n{option_text} \
