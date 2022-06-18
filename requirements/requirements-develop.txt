@@ -2,4 +2,5 @@ boto3==1.17.3
 botocore==1.20.3
 Markdown==3.3.7
 Pygments==2.8.1
+pandas==1.4.2
 git+https://github.com/saralio/saral-utils.git@develop
