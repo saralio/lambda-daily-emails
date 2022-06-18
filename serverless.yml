@@ -20,6 +20,7 @@ package:
     - 'sample-questions.json'
     - 'question.html'
     - 'README.md'
+    - 'rough.ipynb'
 provider:
   name: aws
   runtime: python3.8
@@ -41,6 +42,8 @@ provider:
 functions:
   emailer:
     handler: handler.emailer
+    maximumRetryAttempts: 1
+    memorySize: 512
     environment:
       MY_ENV: ${env:MY_ENV}
       MY_REGION: ${env:MY_REGION}

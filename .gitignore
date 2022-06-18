@@ -19,6 +19,7 @@ question.html
 rough.py 
 sample-questions.json
 node_modules
+rough.ipynb
 
 # Serverless directories
 .serverless
