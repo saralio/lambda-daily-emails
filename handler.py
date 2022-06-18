@@ -67,7 +67,7 @@ def emailer(event, context):
     #TODO: [SAR-39] add youtube link
     #TODO: [SAR-40] add unsubscribe link
     html_text = f"## Here's your daily dose of [#RStats](https://www.twitter.com/data_question)\n\n### Question\n{que_text}\n\n#### Options\n{option_text} \
-    \n\n*To view the answer click [here](#href)*\n\n\n*If you liked the question please consider supporting by [sharing](#href) or by making a [donation](#href). \
+    \n\n*To view the answer click [here](#href)*\n\n\n*If you liked the question please consider supporting by [sharing](#href) or by making a [donation](https://paypal.me/mohit2013?country.x=IN&locale.x=en_GB). \
     Your donation helps us keep the services afloat. Be sure to follow us on [twitter](https://www.twitter.com/data_question) and [Youtube](#href) for regular updates.*\
     \n\n*To unsubscribe click [here](#href)*"
 
