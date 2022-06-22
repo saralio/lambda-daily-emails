@@ -117,8 +117,10 @@ def emailer(event, context):
     #TODO: [SAR-36] add view answer link
     #TODO: [SAR-37] add share link allowing people to share about question or site
     #TODO: [SAR-40] add unsubscribe link
+    tweet="I%20am%20enjoying%20the%20daily%20questions%20from%20%40data_question%20in%20my%20inbox%2C%20if%20you%20would%20like%20to%20receive%20one%20daily%20question%20on%20%23RStats%20programming%2C%20don%27t%20forget%20to%20signup%20at%20https%3A%2F%2Fwww.saral.club%20"
+
     html_text = f"## Here's your daily dose of [#RStats](https://www.twitter.com/data_question)\n\n### Question\n{que_text}\n\n#### Options\n{option_text} \
-    \n\n*To view the answer click [here](#href)*\n\n\n*If you liked the question please consider supporting by [sharing](#href) or by making a [donation](https://paypal.me/mohit2013?country.x=IN&locale.x=en_GB). \
+    \n\n*To view the answer click [here](#href)*\n\n\n*If you liked the question please consider supporting by [sharing](https://twitter.com/intent/tweet?text={tweet}) or by making a [donation](https://paypal.me/mohit2013?country.x=IN&locale.x=en_GB). \
     Your donation helps us keep the services afloat. Be sure to follow us on [twitter](https://www.twitter.com/data_question) and [Youtube](https://www.youtube.com/channel/UChZfYRQRGADaLtgdYaB0YBg) for regular updates.*\
     \n\n*To unsubscribe click [here](#href)*"
 
