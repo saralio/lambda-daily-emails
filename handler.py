@@ -146,9 +146,10 @@ def emailer(event, context):
                 },
                 "Subject": {
                     "Charset": CHARSET,
-                    "Data": "Daily Topics to Rewise"
+                    "Data": "#RStats Question A Day"
                 }
             },
+            #TODO: change source email id to something of saral domain
             Source="mohitlakshya@gmail.com"
         )
     except ClientError as error:
