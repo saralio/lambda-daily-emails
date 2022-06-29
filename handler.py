@@ -148,7 +148,7 @@ def emailer(event, context):
                     "Data": "#RStats Question A Day"
                 }
             },
-            Source="dailyquestion@saral.club"
+            Source="Saral<dailyquestion@saral.club>"
         )
     except ClientError as error:
         print(error)
