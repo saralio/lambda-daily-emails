@@ -115,7 +115,6 @@ def emailer(event, context):
             option_text += f"{str(i+1)}. {opt['text']}\n"
 
     #TODO: [SAR-36] add view answer link
-    #TODO: [SAR-37] add share link allowing people to share about question or site
     #TODO: [SAR-40] add unsubscribe link
     tweet="I%20am%20enjoying%20the%20daily%20questions%20from%20%40data_question%20in%20my%20inbox%2C%20if%20you%20would%20like%20to%20receive%20one%20daily%20question%20on%20%23RStats%20programming%2C%20don%27t%20forget%20to%20signup%20at%20https%3A%2F%2Fwww.saral.club%20"
 
@@ -149,8 +148,7 @@ def emailer(event, context):
                     "Data": "#RStats Question A Day"
                 }
             },
-            #TODO: change source email id to something of saral domain
-            Source="mohitlakshya@gmail.com"
+            Source="dailyquestion@saral.club"
         )
     except ClientError as error:
         print(error)
