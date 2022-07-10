@@ -1,55 +1,15 @@
-import random
-import markdown
 from saral_utils.extractor.dynamo import DynamoDB
 from saral_utils.extractor.dynamo_queries import DynamoQueries
 from saral_utils.utils.env import get_env_var, create_env_api_url
+from saral_utils.utils.qna import normalize_options, image_exist
+
 from botocore.exceptions import ClientError
+import random
+import markdown
 import boto3
 import pandas as pd
-from typing import List, Dict
 from datetime import datetime
-
-def normalize_options(options: List) -> List[Dict[str, str]]:
-    """normalizes a dictionary from dynamodb, specific to options
-
-    Args:
-        options (List[str]): options of a question from table `saral-questions`
-
-    Returns:
-        List[Dict[str, str]]: a list with normalized options in dictonary format. Of the form [{'is_correct':..., 'text':..., 'image_path_exists':...}]
-    """    
-    flat = []
-    for option in options:
-        opt = {}
-        option = option['M']
-        opt['is_correct'] = option['correct']['BOOL']
-        opt['text'] = option['text']['S']
-        opt['image_path_exist'] = True if 'S' in option['imagePath'].keys() else False
-
-        flat.append(opt)
-    return flat
-
-def image_exist(question: Dict) -> bool:
-    """for a given question from `saral-questions` table check if the question has any image associated with it whether in question or in option
-
-    Args:
-        question (Dict): question data
-
-    Returns:
-        bool: True if image exist either in question text or in options otherwise False
-    """
-    que_image_exist = True if 'L' in question['questionImagePath'].keys(
-    ) else False
-
-    options = question['options']['L']
-    flatten_option = normalize_options(options)
-    opt_image_exist = any([True for opt in flatten_option if opt['image_path_exist']])
-
-    if que_image_exist or opt_image_exist:
-        return True
-    else:
-        return False
-
+import urllib
 
 def emailer(event, context):
     print(event)
@@ -85,8 +45,6 @@ def emailer(event, context):
 
 
     # select a question from queries only select questions without images
-    # TODO: [SAR-33] add support for questions with images
-
     if len(que_not_sent) == 0:
         print('No more unique questions left, all questions already sent')
         que_df = pd.json_normalize(que_sent)
@@ -113,15 +71,16 @@ def emailer(event, context):
         for i, opt in enumerate(flatten_options):
             option_text += f"{str(i+1)}. {opt['text']}\n"
 
-    tweet="I%20am%20enjoying%20the%20daily%20questions%20from%20%40data_question%20in%20my%20inbox%2C%20if%20you%20would%20like%20to%20receive%20one%20daily%20question%20on%20%23RStats%20programming%2C%20don%27t%20forget%20to%20signup%20at%20https%3A%2F%2Fwww.saral.club%20"
 
     # add links
     twitter_account_link = "https://twitter.com/data_question"
-    tweet_share_link = f"https://twitter.com/intent/tweet?text={tweet}"
     donation_link = "https://www.buymeacoffee.com/NgFs2zX"
     youtube_link = "https://www.youtube.com/channel/UChZfYRQRGADaLtgdYaB0YBg"
     unsubscribe_link = create_env_api_url(url=f"deregister.saral.club/emailId/{emailId}")
     answer_link = create_env_api_url(url=f"answer.saral.club/qna/{ques_sent_payload['questionId']}")
+    tweet_text = f"Check out this question by @data_question on #RStats: {answer_link}.\nYou can subscribe at https://saral.club to receive such questions daily in your inbox."
+    tweet=urllib.parse.quote_plus(tweet_text) #type:ignore
+    tweet_share_link = f"https://twitter.com/intent/tweet?text={tweet}"
 
     html_text = f"## Here's your daily dose of [#RStats]({twitter_account_link})\n\n### Question\n{que_text}\n\n#### Options\n{option_text} \
     \n\n*To view the answer click [here]({answer_link}).*\n\n\n*If you liked the question please consider supporting by [sharing]({tweet_share_link}) or by making a [donation]({donation_link}). \
