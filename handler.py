@@ -119,14 +119,14 @@ def emailer(event, context):
     twitter_account_link = "https://twitter.com/data_question"
     tweet_share_link = f"https://twitter.com/intent/tweet?text={tweet}"
     donation_link = "https://www.buymeacoffee.com/NgFs2zX"
-    youtube_link = "https://www.youtube.com/channel/"
+    youtube_link = "https://www.youtube.com/channel/UChZfYRQRGADaLtgdYaB0YBg"
     unsubscribe_link = create_env_api_url(url=f"deregister.saral.club/emailId/{emailId}")
     answer_link = create_env_api_url(url=f"answer.saral.club/qna/{ques_sent_payload['questionId']}")
 
     html_text = f"## Here's your daily dose of [#RStats]({twitter_account_link})\n\n### Question\n{que_text}\n\n#### Options\n{option_text} \
-    \n\n*To view the answer click [here]({answer_link})*\n\n\n*If you liked the question please consider supporting by [sharing]({tweet_share_link}) or by making a [donation]({donation_link}). \
-    Your donation helps us keep the services afloat. Be sure to follow us on [twitter]({twitter_account_link}) and [Youtube]({youtube_link}) for regular updates.*\
-    \n\n*To unsubscribe click [here]({unsubscribe_link})*"
+    \n\n*To view the answer click [here]({answer_link}).*\n\n\n*If you liked the question please consider supporting by [sharing]({tweet_share_link}) or by making a [donation]({donation_link}). \
+    Your donation helps us to keep the services afloat. Be sure to follow us on [twitter]({twitter_account_link}) and [Youtube]({youtube_link}) for regular updates.*\
+    \n\n*To unsubscribe click [here]({unsubscribe_link}).*"
 
     # html = html_text
     html = markdown.markdown(html_text, extensions=['markdown.extensions.fenced_code', 'markdown.extensions.codehilite'], extension_configs={
