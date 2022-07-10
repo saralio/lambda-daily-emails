@@ -1,9 +1,8 @@
-from multiprocessing.connection import Client
 import random
 import markdown
 from saral_utils.extractor.dynamo import DynamoDB
 from saral_utils.extractor.dynamo_queries import DynamoQueries
-from saral_utils.utils.env import get_env_var
+from saral_utils.utils.env import get_env_var, create_env_api_url
 from botocore.exceptions import ClientError
 import boto3
 import pandas as pd
@@ -114,14 +113,20 @@ def emailer(event, context):
         for i, opt in enumerate(flatten_options):
             option_text += f"{str(i+1)}. {opt['text']}\n"
 
-    #TODO: [SAR-36] add view answer link
-    #TODO: [SAR-40] add unsubscribe link
     tweet="I%20am%20enjoying%20the%20daily%20questions%20from%20%40data_question%20in%20my%20inbox%2C%20if%20you%20would%20like%20to%20receive%20one%20daily%20question%20on%20%23RStats%20programming%2C%20don%27t%20forget%20to%20signup%20at%20https%3A%2F%2Fwww.saral.club%20"
 
-    html_text = f"## Here's your daily dose of [#RStats](https://www.twitter.com/data_question)\n\n### Question\n{que_text}\n\n#### Options\n{option_text} \
-    \n\n*To view the answer click [here](#href)*\n\n\n*If you liked the question please consider supporting by [sharing](https://twitter.com/intent/tweet?text={tweet}) or by making a [donation](https://paypal.me/mohit2013?country.x=IN&locale.x=en_GB). \
-    Your donation helps us keep the services afloat. Be sure to follow us on [twitter](https://www.twitter.com/data_question) and [Youtube](https://www.youtube.com/channel/UChZfYRQRGADaLtgdYaB0YBg) for regular updates.*\
-    \n\n*To unsubscribe click [here](#href)*"
+    # add links
+    twitter_account_link = "https://twitter.com/data_question"
+    tweet_share_link = f"https://twitter.com/intent/tweet?text={tweet}"
+    donation_link = "https://www.buymeacoffee.com/NgFs2zX"
+    youtube_link = "https://www.youtube.com/channel/UChZfYRQRGADaLtgdYaB0YBg"
+    unsubscribe_link = create_env_api_url(url=f"deregister.saral.club/emailId/{emailId}")
+    answer_link = create_env_api_url(url=f"answer.saral.club/qna/{ques_sent_payload['questionId']}")
+
+    html_text = f"## Here's your daily dose of [#RStats]({twitter_account_link})\n\n### Question\n{que_text}\n\n#### Options\n{option_text} \
+    \n\n*To view the answer click [here]({answer_link}).*\n\n\n*If you liked the question please consider supporting by [sharing]({tweet_share_link}) or by making a [donation]({donation_link}). \
+    Your donation helps us to keep the services afloat. Be sure to follow us on [Twitter]({twitter_account_link}) and [Youtube]({youtube_link}) for regular updates.*\
+    \n\n*To unsubscribe click [here]({unsubscribe_link}).*"
 
     # html = html_text
     html = markdown.markdown(html_text, extensions=['markdown.extensions.fenced_code', 'markdown.extensions.codehilite'], extension_configs={
