@@ -125,7 +125,7 @@ def emailer(event, context):
 
     html_text = f"## Here's your daily dose of [#RStats]({twitter_account_link})\n\n### Question\n{que_text}\n\n#### Options\n{option_text} \
     \n\n*To view the answer click [here]({answer_link}).*\n\n\n*If you liked the question please consider supporting by [sharing]({tweet_share_link}) or by making a [donation]({donation_link}). \
-    Your donation helps us to keep the services afloat. Be sure to follow us on [twitter]({twitter_account_link}) and [Youtube]({youtube_link}) for regular updates.*\
+    Your donation helps us to keep the services afloat. Be sure to follow us on [Twitter]({twitter_account_link}) and [Youtube]({youtube_link}) for regular updates.*\
     \n\n*To unsubscribe click [here]({unsubscribe_link}).*"
 
     # html = html_text
