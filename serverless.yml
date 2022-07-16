@@ -34,9 +34,7 @@ provider:
           Action:
             - ses:SendEmail
             - ses:SendRawEmail
-            - dynamodb:Get*
-            - dynamodb:Query
-            - dynamodb:Scan
+            - dynamodb:*
           Resource: "*"
 
 functions:
