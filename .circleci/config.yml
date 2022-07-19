@@ -14,6 +14,13 @@ commands:
           echo MY_ENV is $MY_ENV
           echo MY_REGION is $MY_REGION
           echo BRANCH_NAME is $BRANCH_NAME
+  sync_reqs_file:
+    description: synchronize develop requirements files with master and staging
+    steps:
+      - run: |
+          cat requirements/requirements-develop.txt > requirements/requirements-master.txt
+          cat requirements/requirements-develop.txt > requirements/requirements-stg.txt
+          sed -i '/^git+https/ s/develop/master/g' requirements/requirements-master.txt
   setup_serverless:
     description: setup serverless
     steps:
@@ -81,6 +88,7 @@ jobs:
       BRANCH_NAME: &branch_name develop
     steps:
       - checkout
+      - sync_reqs_file
       - serverless-framework/setup
       - check_env_var
       - install_plugin
@@ -97,6 +105,7 @@ jobs:
       BRANCH_NAME: &branch_name master
     steps:
       - checkout
+      - sync_reqs_file
       - serverless-framework/setup
       - check_env_var
       - install_plugin
@@ -113,6 +122,7 @@ jobs:
       BRANCH_NAME: &branch_name develop
     steps:
       - checkout
+      - sync_reqs_file
       - serverless-framework/setup
       - check_env_var
       - install_plugin
