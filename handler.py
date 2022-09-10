@@ -4,6 +4,7 @@ from saral_utils.utils.env import get_env_var, create_env_api_url
 from saral_utils.utils.qna import normalize_options, image_exist
 from saral_utils.utils.frontend import ShareLinks
 
+from pandas import DataFrame
 from botocore.exceptions import ClientError
 import random
 import markdown
@@ -11,6 +12,11 @@ import boto3
 import pandas as pd
 from datetime import datetime
 import urllib
+
+def deparse_dynamo_colm(df:DataFrame, col: str, key: str) -> DataFrame:
+    df[col] = df[col].apply(lambda x: x[key])
+    return df
+
 
 def emailer(event, context):
     print(event)
@@ -22,6 +28,7 @@ def emailer(event, context):
     region = get_env_var(env='MY_REGION')
     que_table = f'saral-questions-{env}'
     sent_que_table = f'saral-questions-sent-{env}'
+    user_tble = f'registered-users-{env}'
     
     que_db = DynamoDB(table=que_table, env=env, region=region)
     r_attr = DynamoQueries.r_prog_que_attr_values
@@ -34,36 +41,24 @@ def emailer(event, context):
     print(f'Total available R questions: {len(r_questions)}')
     r_que_wo_imgs = [que for que in r_questions if not image_exist(que)]
     print(f'Total R questions without images: {len(r_que_wo_imgs)}')
-    r_que_ids = [que['id']['S'] for que in r_que_wo_imgs]
     
-    que_sent_db = DynamoDB(table=sent_que_table, env=env, region=region)
-    key_cond_expr = 'emailId = :emailId'
-    expr_attr = {':emailId': {'S': emailId}}
-    que_sent = que_sent_db.query(KeyConditionExpression=key_cond_expr, ExpressionAttributeValues=expr_attr)
-    que_sent_ids = [que['questionId']['S'] for que in que_sent]
+    # fetch user information 
+    user_db = DynamoDB(table=user_tble, env=env, region=region)
+    user_info = user_db.query(KeyConditionExpression='emailId = :emailId', ExpressionAttributeValues={':emailId': {'S': emailId}})
+    user_created_time = user_info[0]['createdAt']['S']
+    user_created_time = datetime.strptime(user_created_time, '%Y-%m-%d %H:%M:%S')
+    n_days = (datetime.now() - user_created_time).days
+    remainder = n_days % len(r_que_wo_imgs)
 
-    que_not_sent = list(set(r_que_ids) - set(que_sent_ids))
+    # finding the unique question
+    que_df = pd.DataFrame(r_que_wo_imgs)
+    que_df = deparse_dynamo_colm(df=que_df, col='createdAt', key='S')
+    que_df['createdAt'] = pd.to_datetime(que_df['createdAt'])
+    que_df = que_df.sort_values(by='createdAt', ascending=True)
+    question = que_df.iloc[remainder, :]
 
-
-    # select a question from queries only select questions without images
-    if len(que_not_sent) == 0:
-        print('No more unique questions left, all questions already sent')
-        que_df = pd.json_normalize(que_sent)
-        first_row = que_df.sort_values(by='sentCount.N', ascending=True).iloc[0, :]
-        que_id_min_sent = first_row['questionId.S']
-        sent_count = first_row['sentCount.N']
-        question = que_db.get_item(key={'topic': {'S': 'Programming'}, 'id': {'S': que_id_min_sent}}) # type: ignore
-        ques_sent_payload = {'emailId': emailId, 'questionId': que_id_min_sent, 'sentCount': int(sent_count) + 1}
-        print(f'Data to write to saral-questions-sent: {ques_sent_payload}')
-    else:
-        print(f'Question ids not sent so far: {que_not_sent}')
-        ques_not_sent_id = random.choice(que_not_sent)
-        print(f'Selected question with id: {ques_not_sent_id}')
-        question = que_db.get_item(key={'topic': {'S': 'Programming'}, 'id': {'S': ques_not_sent_id}}) # type: ignore
-        ques_id = question['id']['S']
-        ques_sent_payload = {'emailId': emailId, 'questionId': ques_id, 'sentCount': 1}    
-    
     que_text = question['questionText']['S']
+    que_id = question['id']['S']
     flatten_options = normalize_options(question['options']['L'])
     option_text = ""
     if len(flatten_options) == 0:
@@ -81,7 +76,7 @@ def emailer(event, context):
     unsubscribe_link = sl.unsubscribe_link
     website_link = sl.saral_website_link
     sharing_link = sl.sharing_link
-    answer_link = create_env_api_url(url=f"answer.saral.club/qna/{ques_sent_payload['questionId']}")
+    answer_link = create_env_api_url(url=f"answer.saral.club/qna/{que_id}")
     tweet_text = f"Check out this question by @data_question on #RStats: {answer_link}.\nYou can subscribe at {website_link} to receive such questions daily in your inbox."
     tweet=urllib.parse.quote_plus(tweet_text) #type:ignore
     tweet_share_link = f"{sharing_link}{tweet}"
@@ -122,19 +117,4 @@ def emailer(event, context):
         print(error)
         raise RuntimeError(error)
     
-    # upload question sent payload to saral-questions-sent table
-    try:
-        response = que_sent_db.put_item(
-            payload={
-                'emailId': {'S': ques_sent_payload['emailId']},
-                'questionId': {'S': ques_sent_payload['questionId']},
-                'sentCount': {'N': str(ques_sent_payload['sentCount'])},
-                'dateSent': {'S': datetime.now().strftime('%Y-%m-%d')}
-            }
-        )
-        response = {"statusCode": 200}
-    except ClientError as error:
-        print(f'Not able to upload sent question to `saral-questions-sent` table. Error returned: {error}')
-        response = {"statusCode": 500}
-
     return response
